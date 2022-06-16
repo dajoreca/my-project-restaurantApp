@@ -1,6 +1,5 @@
 import React, { useContext, useEffect, Fragment } from "react";
-import { StyleSheet, View } from "react-native";
-import FirebaseContext from "../context/firebase/firebaseContext";
+import { StyleSheet, View, TouchableOpacity } from "react-native";
 import {
   Container,
   Divider,
@@ -18,9 +17,15 @@ import {
 
 import globalStyles from "../styles/global";
 
+import FirebaseContext from "../context/firebase/firebaseContext";
+import PedidoContext from "../context/pedidos/pedidosContext";
+
 const Menu = () => {
   //context de firebase
   const { menu, ObtenerProductos } = useContext(FirebaseContext);
+
+  //Context de pedido
+  const { seleccionarPlatillo } = useContext(PedidoContext);
 
   useEffect(() => {
     ObtenerProductos();
@@ -31,57 +36,67 @@ const Menu = () => {
       const categoriaAnterior = menu[i - 1].categoria;
       if (categoriaAnterior !== categoria) {
         return (
-          <Divider style={styles.separador}>
+          <View style={styles.separador}>
             <Text style={styles.separadorTexto}> {categoria} </Text>
-          </Divider>
+          </View>
         );
       }
     } else {
       return (
-        <Divider style={styles.separador}>
+        <View style={styles.separador}>
           <Text style={styles.separadorTexto}> {categoria} </Text>
-        </Divider>
+        </View>
       );
     }
   };
 
   return (
     <Container style={globalStyles.contenedor}>
-      <View style={styles.box}>
-        <List>
-          {menu.map((platillo, i) => {
-            const { imagen, nombre, descripcion, categoria, precio, id } =
-              platillo;
-            //console.log(imagen);
+      <View>
+        {menu.map((platillo, i) => {
+          const { imagen, nombre, descripcion, categoria, precio, id } =
+            platillo;
 
-            return (
-              <View key={id}>
-                <View>{mostrarHeading(categoria, i)}</View>
+          return (
+            <List key={id}>
+              <View>{mostrarHeading(categoria, i)}</View>
+              <TouchableOpacity
+                style={styles.contenedor}
+                onPress={() => {
+                  //Eliminar algunas propiedades del platillo
+                  const { existencia, ...platillo2 } = platillo;
 
-                <View style={styles.contenedor}>
-                  <Text marginBottom={2} style={styles.textoNombre}>
-                    {nombre}
-                  </Text>
+                  seleccionarPlatillo(platillo2);
 
-                  <View style={styles.imgText}>
-                    <Image
-                      size={60}
-                      //resizeMode={"contain"}
-                      borderRadius={100}
-                      source={{ uri: imagen }}
-                      alt="Alternate Text"
-                    />
+                  console.log(platillo2);
+                }}
+              >
+                <Text marginBottom={2} style={styles.textoNombre}>
+                  {nombre}
+                </Text>
 
+                <View style={styles.imgText}>
+                  <Image
+                    size={60}
+                    //resizeMode={"contain"}
+                    borderRadius={100}
+                    source={{ uri: imagen }}
+                    alt="Alternate Text"
+                  />
+                  <View>
                     <Text style={styles.description} note numberOfLines={2}>
                       {descripcion}
                     </Text>
-                    <Text marginRight={2}> Precio: {precio}</Text>
+                    <Text style={styles.textDescription}>
+                      {" "}
+                      Precio: {precio}
+                    </Text>
                   </View>
                 </View>
-              </View>
-            );
-          })}
-        </List>
+              </TouchableOpacity>
+            </List>
+          );
+        })}
       </View>
     </Container>
   );
@@ -89,21 +104,31 @@ const Menu = () => {
 
 const styles = StyleSheet.create({
   contenedor: {
-    flex: 1,
+    //flex: 1,
     padding: 20,
-    borderWidth: 1,
-    borderStyle: "solid",
+    //borderWidth: 1,
+    //borderStyle: "solid",
+    //borderWidth: 0,
   },
   box: {
-    backgroundColor: "#FFF",
-    width: "-webkit-fill-available",
+    // backgroundColor: "#FFF",
+    //width: "-webkit-fill-available",
   },
   textoNombre: {
     textTransform: "uppercase",
     fontWeight: "bold",
   },
   description: {
-    margin: "auto",
+    //flexshrink: 0,
+    //margin: "auto",
+    marginRight: 10,
+    marginLeft: 20,
+    padding: 5,
+    maxWidth: 280,
+    color: "#4B4B4B",
+  },
+  textDescription: {
+    //margin: "auto",
     marginRight: 10,
     marginLeft: 20,
   },
@@ -116,6 +141,7 @@ const styles = StyleSheet.create({
   separadorTexto: {
     color: "#FFDA00",
     fontWeight: "bold",
+    textTransform: "uppercase",
   },
 });
 
